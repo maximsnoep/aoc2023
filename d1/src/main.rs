@@ -23,8 +23,9 @@ fn main() {
         .into_iter()
         .map(|x| x.unwrap())
         .fold(0, |acc, line| {
-            let mut alphanumerics = (1..=5)
-                .map(|w| {
+            let mut alphanumerics = [1, 3, 4, 5]
+                .iter()
+                .map(|&w| {
                     line
                         .as_bytes()
                         .iter()
@@ -32,20 +33,17 @@ fn main() {
                         .enumerate()
                         .collect::<Vec<_>>()
                         .windows(w)
-                        .map(|bytes_w| {
-                            (bytes_w[0].0, String::from_utf8(bytes_w.iter().map(|&(_, byte)| byte).collect()).unwrap())
-                        })
-                        .filter_map(|(i, string_w)| match string_w.as_str() {
-                            "0" | "zero"  => Some((i, b'0')),
-                            "1" | "one"   => Some((i, b'1')),
-                            "2" | "two"   => Some((i, b'2')),
-                            "3" | "three" => Some((i, b'3')),
-                            "4" | "four"  => Some((i, b'4')),
-                            "5" | "five"  => Some((i, b'5')),
-                            "6" | "six"   => Some((i, b'6')),
-                            "7" | "seven" => Some((i, b'7')),
-                            "8" | "eight" => Some((i, b'8')),
-                            "9" | "nine"  => Some((i, b'9')),
+                        .filter_map(|s| match s {
+                            [(_, b'0')] | [(_, b'z'),(_,b'e'),(_,b'r'),(_,b'o')]            => Some((s[0].0, 0)),
+                            [(_, b'1')] | [(_, b'o'),(_,b'n'),(_,b'e')]                     => Some((s[0].0, 1)),
+                            [(_, b'2')] | [(_, b't'),(_,b'w'),(_,b'o')]                     => Some((s[0].0, 2)),
+                            [(_, b'3')] | [(_, b't'),(_,b'h'),(_,b'r'),(_,b'e'),(_,b'e')]   => Some((s[0].0, 3)),
+                            [(_, b'4')] | [(_, b'f'),(_,b'o'),(_,b'u'),(_,b'r')]            => Some((s[0].0, 4)),
+                            [(_, b'5')] | [(_, b'f'),(_,b'i'),(_,b'v'),(_,b'e')]            => Some((s[0].0, 5)),
+                            [(_, b'6')] | [(_, b's'),(_,b'i'),(_,b'x')]                     => Some((s[0].0, 6)),
+                            [(_, b'7')] | [(_, b's'),(_,b'e'),(_,b'v'),(_,b'e'),(_,b'n')]   => Some((s[0].0, 7)),
+                            [(_, b'8')] | [(_, b'e'),(_,b'i'),(_,b'g'),(_,b'h'),(_,b't')]   => Some((s[0].0, 8)),
+                            [(_, b'9')] | [(_, b'n'),(_,b'i'),(_,b'n'),(_,b'e')]            => Some((s[0].0, 9)),
                             _ => None,
                         })
                         .collect::<Vec<_>>()
@@ -54,7 +52,7 @@ fn main() {
                 .collect::<Vec<_>>();
 
             alphanumerics.sort_by(|(a, _), (b, _)| a.cmp(b));
-            acc + String::from_utf8_lossy(&[alphanumerics.first().unwrap().1, alphanumerics.last().unwrap().1]).parse::<i32>().unwrap()
+            acc + 10 * alphanumerics.first().unwrap().1 + alphanumerics.last().unwrap().1
         });
     
     println!("{:?}", sum);
