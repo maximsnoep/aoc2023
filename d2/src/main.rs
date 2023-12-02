@@ -1,11 +1,8 @@
-use std::fs::File;
-use std::io::{BufRead, BufReader};
-
 fn main() {
     let file = "input/test";
 
     // PART 1
-    let lines = BufReader::new(File::open(file).expect("Error opening file (!)")).lines();
+    let lines = std::io::BufRead::lines(std::io::BufReader::new(std::fs::File::open(file).expect("Error opening file (!)")));
 
     let result = lines
         .into_iter()
@@ -30,7 +27,7 @@ fn main() {
 
 
     // PART 2
-    let lines = BufReader::new(File::open(file).expect("Error opening file (!)")).lines();
+    let lines = std::io::BufRead::lines(std::io::BufReader::new(std::fs::File::open(file).expect("Error opening file (!)")));
 
     let result = lines
         .into_iter()

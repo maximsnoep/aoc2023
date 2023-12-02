@@ -1,11 +1,8 @@
-use std::fs::File;
-use std::io::{BufRead, BufReader};
-
 fn main() {
     let file = "input/test";
 
     // PART 1
-    let mut lines = BufReader::new(File::open(file).expect("Error opening file (!)")).lines();
+    let mut lines = std::io::BufRead::lines(std::io::BufReader::new(std::fs::File::open(file).expect("Error opening file (!)")));
     let mut sum = 0;
     while let Some(Ok(line)) = lines.next() {
         let bytes = line.as_bytes().into_iter().copied();
@@ -18,7 +15,7 @@ fn main() {
     println!("{:?}", sum);
 
     // PART 2
-    let lines = BufReader::new(File::open(file).expect("Error opening file (!)")).lines();
+    let lines = std::io::BufRead::lines(std::io::BufReader::new(std::fs::File::open(file).expect("Error opening file (!)")));
     let sum = lines
         .into_iter()
         .map(|x| x.unwrap())
