@@ -36,7 +36,7 @@ fn main() {
 
 
 
-    // PART 1
+    // PART 2
     let lines = std::io::BufRead::lines(std::io::BufReader::new(std::fs::File::open(file).expect("Error opening file (!)")));
     
     let winnings = lines.map(|x| x.unwrap())
