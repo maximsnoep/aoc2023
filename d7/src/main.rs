@@ -13,52 +13,88 @@ fn main() {
 
     // PART 1
     let lines = std::io::BufRead::lines(std::io::BufReader::new(std::fs::File::open(file).expect("Error opening file (!)")));
-    
-    let winnings = lines
-    .map(|x| x.unwrap())
-    .map(|line| {
-        let (hand_s, bid_s) = line.split_once(' ').unwrap();
-        let hand = hand_s.chars().map(|ch| match ch {
-            'T' => 8u32, 'J' => 9u32, 'Q' => 10u32, 'K' => 11u32, 'A' => 12u32, _ => ch as u32 - 50u32
-        }).collect::<Vec<_>>();
-        let bid = bid_s.parse::<u32>().unwrap();
-        
-        let strength = hand.iter().into_group_map_by(|&x| x).iter().map(|(_, v)| v.len().pow(2u32)).sum::<usize>() as f64;
-        let strength2 = hand[0]as f64/120f64 + hand[1]as f64/12000f64 + hand[2]as f64/1200000f64 + hand[3]as f64/120000000f64 + hand[4]as f64/12000000000f64;
 
-        (strength + strength2, bid)
-     })
-     .sorted_by(|a, b| a.0.partial_cmp(&b.0).unwrap() )
-     .enumerate()
-     .fold(0, |acc, (rank, (_, bid))| { acc + (rank as u32 + 1) * bid });
+    let winnings = lines
+        .map(|x| x.unwrap())
+        .map(|line| {
+            let (hand_s, bid_s) = line.split_once(' ').unwrap();
+            let hand = hand_s
+                .chars()
+                .map(|ch| match ch {
+                    'A' => 12u8,
+                    'K' => 11u8,
+                    'Q' => 10u8,
+                    'J' => 9u8,
+                    'T' => 8u8,
+                    _ => ch as u8 - 50u8,
+                })
+                .collect::<Vec<_>>();
+
+            let strength = hand
+                .iter()
+                .into_group_map_by(|&x| x)
+                .iter()
+                .map(|(_, v)| v.len().pow(2) as u8)
+                .sum();
+
+            (
+                u64::from_be_bytes([0, 0, strength, hand[0], hand[1], hand[2], hand[3], hand[4]]),
+                bid_s.parse::<u32>().unwrap(),
+            )
+        })
+        .sorted_by_key(|x| x.0)
+        .enumerate()
+        .fold(0, |acc, (rank, (_, bid))| acc + (rank as u32 + 1) * bid);
 
     println!("{winnings:?}");
 
-
+    assert!(winnings == 254024898);
 
     // PART 2
     let lines = std::io::BufRead::lines(std::io::BufReader::new(std::fs::File::open(file).expect("Error opening file (!)")));
-    
-    let winnings = lines.map(|x| x.unwrap())
-    .map(|line| {
-        let (hand_s, bid_s) = line.split_once(' ').unwrap();
-        let hand = hand_s.chars().map(|ch| match ch {
-            'T' => 9u32, 'J' => 0u32, 'Q' => 10u32, 'K' => 11u32, 'A' => 12u32, _ => ch as u32 - 49u32
-        }).collect::<Vec<_>>();
-        let bid = bid_s.parse::<u32>().unwrap();
 
-        let jokers = hand.iter().filter(|&&c| c==0u32).count();        
+    let winnings = lines
+        .map(|x| x.unwrap())
+        .map(|line| {
+            let (hand_s, bid_s) = line.split_once(' ').unwrap();
+            let hand = hand_s
+                .chars()
+                .map(|ch| match ch {
+                    'A' => 12u8,
+                    'K' => 11u8,
+                    'Q' => 10u8,
+                    'J' => 0u8,
+                    'T' => 9u8,
+                    _ => ch as u8 - 49u8,
+                })
+                .collect::<Vec<_>>();
 
-        let strength = hand.iter().into_group_map_by(|&x| x).into_iter().sorted_by_key(|k| if *k.0 == 0u32 { 0 } else { k.1.len() }).rev().enumerate().map(|(i, (k, v))| if *k == 0u32 { if jokers==5 { (jokers).pow(2u32) } else { 0 } } else if i == 0 { (v.len() + jokers).pow(2u32) } else { v.len().pow(2u32) }).sum::<usize>() as f64;
-        let strength2 = hand[0]as f64/120f64 + hand[1]as f64/12000f64 + hand[2]as f64/1200000f64 + hand[3]as f64/120000000f64 + hand[4]as f64/12000000000f64;
+            let strength = hand
+                .iter()
+                .into_group_map_by(|&x| x)
+                .into_iter()
+                .map(|(&k, v)| if k == 0u8 { (k, vec![]) } else { (k, v) })
+                .sorted_by_key(|x| -(x.1.len() as i8))
+                .enumerate()
+                .map(|(i, (_, v))| {
+                    if i == 0 {
+                        ((v.len() + hand.iter().filter(|&&c| c == 0u8).count()) as u8).pow(2)
+                    } else {
+                        (v.len() as u8).pow(2)
+                    }
+                })
+                .sum();
 
-        (strength + strength2, bid)
-    })
-    .sorted_by(|a, b| a.0.partial_cmp(&b.0).unwrap() )
-    .enumerate().fold(0, |acc, (rank, (_, bid))| {
-        acc + (rank as u32 + 1) * bid
-    });
- 
+            (
+                u64::from_be_bytes([0, 0, strength, hand[0], hand[1], hand[2], hand[3], hand[4]]),
+                bid_s.parse::<u32>().unwrap(),
+            )
+        })
+        .sorted_by_key(|x| x.0)
+        .enumerate()
+        .fold(0, |acc, (rank, (_, bid))| acc + (rank as u32 + 1) * bid);
+
     println!("{winnings:?}");
-    
+
+    assert!(winnings == 254115617);
 }
